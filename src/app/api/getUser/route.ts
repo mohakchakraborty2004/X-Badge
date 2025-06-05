@@ -17,12 +17,7 @@ export async function GET(req: Request) {
         'created_at',
         'description',
         'location',
-        'profile_image_url',
-        'protected',
-        'public_metrics',
-        'url',
-        'verified',
-        'verified_type'
+        'profile_image_url'
       ];
 
       const fields = defaultFields;
