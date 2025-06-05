@@ -21,6 +21,14 @@ interface Xresponse {
   } }
 }
 
+interface ghResponse {
+   totalRepositories: number,
+    totalStars : number,
+    totalCommits : number,
+    topLanguages : string[],
+    repositoriesProcessed: number
+}
+
 
 export default function SimpleForm() {
   const [formData, setFormData] = useState({
@@ -43,7 +51,7 @@ export default function SimpleForm() {
     totalRepositories: 0,
     totalStars : 0,
     totalCommits : 0,
-    topLanguages : [],
+    topLanguages : [""],
     repositoriesProcessed: 0
   })
 
@@ -83,14 +91,23 @@ export default function SimpleForm() {
   }
 
   const handleGhVerify  = async () => {
-    setVerifying(true)
-    console.log(XData)
-    // Simulate Twitter/GitHub verification (replace with actual API logic)
-    await new Promise((r) => setTimeout(r, 1000))
-    setVerified(true)
+    setGhVerifying(true)
+    const response = await axios.get<ghResponse>(`/api/github?username=${ghusername}`)
+    const veriData = response.data
 
-    setVerifying(false)
+    setGhData({
+      totalRepositories : veriData.totalRepositories,
+      totalStars : veriData.totalStars,
+      totalCommits: veriData.totalCommits,
+      topLanguages : veriData.topLanguages,
+      repositoriesProcessed : veriData.repositoriesProcessed
+    })
+
+    GhsetVerified(true)
+
+    setGhVerifying(false)
   }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     console.log(formData)
@@ -142,7 +159,10 @@ export default function SimpleForm() {
                 id="githubID"
                 placeholder="your-github-id"
                 value={formData.githubID}
-                onChange={(e) => handleInputChange("githubID", e.target.value)}
+                onChange={(e) => {
+                  handleInputChange("githubID", e.target.value)
+                  setGh(e.target.value)
+                }}
                 onFocus={() => setFocusedField("githubID")}
                 onBlur={() => setFocusedField("")}
                 className={`bg-gray-800 text-white border-gray-600 placeholder-gray-500 transition-all duration-300 ${
@@ -178,7 +198,7 @@ export default function SimpleForm() {
               <Label htmlFor="url" className="text-gray-300">Url</Label>
               <Input
                 id="url"
-                placeholder="what should we call you?"
+                placeholder="enter a portfolio , your github or resume link"
                 value={formData.url}
                 onChange={(e) => handleInputChange("url", e.target.value)}
                 onFocus={() => setFocusedField("url")}
