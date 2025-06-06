@@ -140,7 +140,8 @@ export default function SimpleForm() {
       XData,
       ghData,
       fullName,
-      url
+      url,
+      xusername
     }
     console.log(data)
     const response =  await axios.post<response>('/api/analyze', data)

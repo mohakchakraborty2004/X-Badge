@@ -1,4 +1,5 @@
 import { QrCodeIcon, DotIcon, GitBranch, Star, Activity } from "lucide-react";
+import Image from "next/image";
 
 type BadgeProps = {
   id?: string;
@@ -122,7 +123,7 @@ const OldBadgeCard : React.FC<BadgeProps> = ({
               </div>
               <div className="text-right">
                 <div className="mb-1">JOINED</div>
-                <div className="text-white font-bold text-xs">{created_At.toUpperCase()}</div>
+                <div className="text-white font-bold text-xs">{(formatToMonthYear(created_At)).toUpperCase()}</div>
               </div>
             </div>
 
@@ -192,11 +193,16 @@ const OldBadgeCard : React.FC<BadgeProps> = ({
         <div className="flex items-center gap-8 mb-10">
           <div className="relative">
             {profileUrl &&
-             <img
-              className="h-32 w-32 rounded-full object-cover ring-4 ring-white shadow-xl"
-              src={profileUrl}
-              alt="Profile"
-            />
+           <div className="relative h-32 w-32 rounded-full ring-4 ring-white shadow-xl overflow-hidden">
+              <Image
+                src={profileUrl}
+                alt="Profile"
+                fill
+                className="object-cover"
+                quality={95}
+                sizes="128px"
+              />
+            </div>
             }
            
             <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white"></div>
@@ -304,3 +310,12 @@ const Badge = ({ status }: { status: string }) => {
     </div>
   );
 };
+
+
+function formatToMonthYear(dateString : string) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { 
+    month: 'long', 
+    year: 'numeric' 
+  });
+}

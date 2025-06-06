@@ -108,7 +108,7 @@ catch(error) {
 export async function POST(req : NextRequest) {
 
     const body = await req.json()
-    const {XData, ghData, fullName, url} : {XData : Xdata, ghData : ghData, fullName : string, url: string } = body
+    const {XData, ghData, fullName, url, xusername} : {XData : Xdata, ghData : ghData, fullName : string, url: string, xusername: string } = body
 
     console.log(XData, ghData, fullName, url);
   
@@ -143,13 +143,14 @@ export async function POST(req : NextRequest) {
                     followers : XData.followers,
                     profileUrl : XData.profile_image_url,
                     QrUrl : uriencodedURL,
-                    Xusername : XData.username,
+                    Xusername : xusername,
                     Xname : XData.name,
                     location : XData.location,
                     NgmiBadge : response.badge,
                     created_At : XData.created_at,
                     Worth : response.worth, 
-                    jobLevel : response.jobLevel
+                    jobLevel : response.jobLevel,
+                    FullName : fullName
                 }
             })
 
@@ -174,7 +175,7 @@ export async function POST(req : NextRequest) {
                     followers : XData.followers,
                     profileUrl : XData.profile_image_url,
                     QrUrl : uriencodedURL,
-                    Xusername : XData.username,
+                    Xusername : xusername,
                     Xname : XData.name,
                     location : XData.location,
                     NgmiBadge : response.badge,

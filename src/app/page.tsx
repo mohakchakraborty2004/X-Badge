@@ -8,6 +8,8 @@ const DevWorthLanding = () => {
 const [isVisible, setIsVisible] = useState<Record<string, boolean>>({});
 const [scrollY, setScrollY] = useState(0);
 
+const router = useRouter()
+
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll);
@@ -141,7 +143,7 @@ const [scrollY, setScrollY] = useState(0);
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
             onClick={()=> {
-              useRouter().push('/form')
+              router.push('/form')
             }}
             className="group relative px-8 py-4 bg-black border-2 border-violet-500 rounded-xl font-semibold text-white hover:bg-violet-500 transition-all duration-300 flex items-center space-x-2">
               <span>Get Started</span>
@@ -313,7 +315,7 @@ const [scrollY, setScrollY] = useState(0);
             Join thousands of developers who've already discovered their true value
           </p>
           <button onClick={()=> {
-            useRouter().push('/form')
+            router.push('/form')
           }} className="group relative px-10 py-5 bg-gradient-to-r from-violet-600 to-blue-600 rounded-xl font-semibold text-white hover:from-violet-500 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 mx-auto">
             <span className="text-lg">Get Started Now</span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
