@@ -149,6 +149,7 @@ export default function SimpleForm() {
     if(response && response.data.status == 200) {
       router.push(`/badge/${response.data.id}`);
     } else {
+      alert(response.data.msg)
       toast(response.data.msg);
     }
   }
