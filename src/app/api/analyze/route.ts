@@ -6,7 +6,6 @@ import { GoogleGenAI } from "@google/genai"
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/db/db";
 import dotenv from "dotenv"
-import axios from "axios";
 
 dotenv.config()
 

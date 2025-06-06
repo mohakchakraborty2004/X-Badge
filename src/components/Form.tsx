@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { CheckCircleIcon, XCircleIcon } from "lucide-react"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 interface Xresponse {
   msg : string
@@ -35,8 +37,17 @@ interface ghResponse {
     repositoriesProcessed: number
 }
 
+  interface response {
+    status : number
+    msg : string
+    id : string
+  }
+
 
 export default function SimpleForm() {
+
+  const router = useRouter()
+
   const [formData, setFormData] = useState({
     twitterID: "",
     githubID: "",
@@ -53,6 +64,7 @@ export default function SimpleForm() {
     profile_image_url : "",
     followers : 0
   })
+
 
   const [ghData, setGhData] = useState({
     totalRepositories: 0,
@@ -118,6 +130,12 @@ export default function SimpleForm() {
   }
 
   const handleSubmit = async () => {
+
+    if(!verified || !Ghverified || !fullName || !url) {
+      toast("please verify and fillup the form")
+      return;
+    }
+
     const data = {
       XData,
       ghData,
@@ -125,7 +143,13 @@ export default function SimpleForm() {
       url
     }
     console.log(data)
-    const response =  await axios.post('/api/analyze', data)
+    const response =  await axios.post<response>('/api/analyze', data)
+
+    if(response && response.data.status == 200) {
+      router.push(`/badge/${response.data.id}`);
+    } else {
+      toast(response.data.msg);
+    }
   }
 
   return (
@@ -230,7 +254,9 @@ export default function SimpleForm() {
             {/* Submit */}
             
           </form>
-          <Button onClick={handleSubmit} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold">
+          <Button
+          disabled = {!verified && !Ghverified && !fullName && !url}
+          onClick={handleSubmit} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold mt-3">
               Submit
           </Button>
         </CardContent>
