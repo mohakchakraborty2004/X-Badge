@@ -17,7 +17,8 @@ export async function GET(req: Request) {
         'created_at',
         'description',
         'location',
-        'profile_image_url'
+        'profile_image_url',
+        'public_metrics'
       ];
 
       const fields = defaultFields;

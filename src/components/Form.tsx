@@ -18,6 +18,12 @@ interface Xresponse {
     description : string,
     location : string,
     profile_image_url : string
+    public_metrics : {
+      followers_count: number,
+      following_count: number,
+      tweet_count : number,
+      listed_count: number
+    }
   } }
 }
 
@@ -44,7 +50,8 @@ export default function SimpleForm() {
     created_at : "",
     description : "",
     location : "",
-    profile_image_url : ""
+    profile_image_url : "",
+    followers : 0
   })
 
   const [ghData, setGhData] = useState({
@@ -55,6 +62,7 @@ export default function SimpleForm() {
     repositoriesProcessed: 0
   })
 
+  const [url , seturl] = useState("")
   const [fullName, setFullName] = useState("")
   const [xusername, setX] = useState("")
   const [ghusername, setGh] = useState("")
@@ -83,7 +91,8 @@ export default function SimpleForm() {
       created_at : veriData.data.data.created_at,
       description : veriData.data.data.description,
       location : veriData.data.data.location,
-      profile_image_url : veriData.data.data.profile_image_url
+      profile_image_url : veriData.data.data.profile_image_url,
+      followers : veriData.data.data.public_metrics.followers_count
      })
      setVerified(true)
 
@@ -108,10 +117,15 @@ export default function SimpleForm() {
     setGhVerifying(false)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log(formData)
-    alert("Submitted!")
+  const handleSubmit = async () => {
+    const data = {
+      XData,
+      ghData,
+      fullName,
+      url
+    }
+    console.log(data)
+    const response =  await axios.post('/api/analyze', data)
   }
 
   return (
@@ -126,7 +140,7 @@ export default function SimpleForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form className="space-y-6">
             {/* Twitter ID */}
             <div className="space-y-2">
               <Label htmlFor="twitterID" className="text-gray-300">Twitter Handle</Label>
@@ -184,7 +198,9 @@ export default function SimpleForm() {
                 id="username"
                 placeholder="what should we call you?"
                 value={formData.username}
-                onChange={(e) => handleInputChange("username", e.target.value)}
+                onChange={(e) => {handleInputChange("username", e.target.value)
+                  setFullName(e.target.value);
+                }}
                 onFocus={() => setFocusedField("username")}
                 onBlur={() => setFocusedField("")}
                 className={`bg-gray-800 text-white border-gray-600 placeholder-gray-500 transition-all duration-300 ${
@@ -200,7 +216,9 @@ export default function SimpleForm() {
                 id="url"
                 placeholder="enter a portfolio , your github or resume link"
                 value={formData.url}
-                onChange={(e) => handleInputChange("url", e.target.value)}
+                onChange={(e) => {handleInputChange("url", e.target.value)
+                  seturl(e.target.value);
+                }}
                 onFocus={() => setFocusedField("url")}
                 onBlur={() => setFocusedField("")}
                 className={`bg-gray-800 text-white border-gray-600 placeholder-gray-500 transition-all duration-300 ${
@@ -210,10 +228,11 @@ export default function SimpleForm() {
             </div>
 
             {/* Submit */}
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold">
-              Submit
-            </Button>
+            
           </form>
+          <Button onClick={handleSubmit} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold">
+              Submit
+          </Button>
         </CardContent>
       </Card>
     </div>
