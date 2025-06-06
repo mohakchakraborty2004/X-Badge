@@ -169,7 +169,7 @@ export default function SimpleForm() {
           <form className="space-y-6">
             {/* Twitter ID */}
             <div className="space-y-2">
-              <Label htmlFor="twitterID" className="text-gray-300">Twitter Handle</Label>
+              <Label htmlFor="twitterID" className="text-gray-300">Twitter Handle (No @ required)</Label>
               <Input
                 id="twitterID"
                 placeholder="@yourhandle"
