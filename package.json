@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+     "postinstall": "prisma generate --schema=./src/db/schema.prisma",
+    "db:generate": "prisma generate --schema=./src/db/schema.prisma",
+    "db:push": "prisma db push --schema=./src/db/schema.prisma"
   },
   "dependencies": {
     "@google/genai": "^1.4.0",
