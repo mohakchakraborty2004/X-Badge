@@ -6,6 +6,7 @@ import { GoogleGenAI } from "@google/genai"
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/db/db";
 import dotenv from "dotenv"
+import axios from "axios";
 
 dotenv.config()
 
@@ -113,6 +114,7 @@ export async function POST(req : NextRequest) {
     console.log(XData, ghData, fullName, url);
   
     const response : AnalyzeData = await analyze(XData, ghData)
+    const uriencodedURL = encodeURI(url)
 
     if(!response) {
         return NextResponse.json({
@@ -136,16 +138,19 @@ export async function POST(req : NextRequest) {
                 } , 
                 data : {
                     ghStars : ghData.totalStars,
+                    Trepos : ghData.repositoriesProcessed,
+                    Tcommits : ghData.totalCommits,
                     remarks : response.remarks,
                     followers : XData.followers,
                     profileUrl : XData.profile_image_url,
-                    QrUrl : url,
+                    QrUrl : uriencodedURL,
                     Xusername : XData.username,
                     Xname : XData.name,
                     location : XData.location,
                     NgmiBadge : response.badge,
                     created_At : XData.created_at,
-                    Worth : response.worth
+                    Worth : response.worth, 
+                    jobLevel : response.jobLevel
                 }
             })
 
@@ -169,7 +174,7 @@ export async function POST(req : NextRequest) {
                     remarks : response.remarks,
                     followers : XData.followers,
                     profileUrl : XData.profile_image_url,
-                    QrUrl : url,
+                    QrUrl : uriencodedURL,
                     Xusername : XData.username,
                     Xname : XData.name,
                     location : XData.location,
@@ -178,7 +183,10 @@ export async function POST(req : NextRequest) {
                     Worth : response.worth, 
                     Xid : XData.id,
                     FullName : fullName,
-                    about : XData.description
+                    about : XData.description,
+                    Trepos : ghData.repositoriesProcessed,
+                    Tcommits : ghData.totalCommits,
+                    jobLevel : response.jobLevel
             }
         })
 

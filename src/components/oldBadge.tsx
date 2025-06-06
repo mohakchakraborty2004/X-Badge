@@ -1,12 +1,24 @@
-import { QrCodeIcon, DotIcon } from "lucide-react";
+import { QrCodeIcon, DotIcon, GitBranch, Star, Activity } from "lucide-react";
 
 type BadgeProps = {
-  username: string;
-  name: string;
+  id?: string;
+  profileUrl?: string | null;
+  ghStars?: number;
+  remarks?: string;
+  Xid?: string;
+  Xusername: string;
   followers: number;
-  joined: string;
+  Xname: string;
   about: string;
   location: string;
+  FullName: string;
+  QrUrl?: string;
+  NgmiBadge: string;
+  Worth: string;
+  created_At: string;
+  jobLevel : string;
+  Trepos : number;
+  Tcommits : number;
   badgeLevel: string;
   badgeLabel: string;
   showQR?: boolean;
@@ -19,12 +31,22 @@ type BadgeProps = {
 };
 
 const OldBadgeCard : React.FC<BadgeProps> = ({
-  username,
-  name,
+  profileUrl,
+  remarks,
+  Xusername,
   followers,
-  joined,
+  Xname,
   about,
   location,
+  FullName,
+  QrUrl,
+  NgmiBadge,
+  Worth,
+  created_At,
+  jobLevel,
+  Trepos,
+  ghStars,
+  Tcommits,
   badgeLevel,
   badgeLabel,
   showQR = true,
@@ -38,8 +60,16 @@ const OldBadgeCard : React.FC<BadgeProps> = ({
     overlayOpacity = 0.7, // Default overlay opacity
   } = style;
 
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${QrUrl}&size=90x90`;
+
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-200 to-white flex items-center justify-center p-6">
+
+    <div className="grid grid-flow-col grid-cols-2">
+
+
+      <div className="col-span-1">
+           <div className="min-h-screen bg-gradient-to-b from-blue-200 to-white flex items-center justify-center p-6 rounded-3xl m-6">
       <div className="relative">
         {/* Badge Clip */}
         <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 z-10">
@@ -77,7 +107,7 @@ const OldBadgeCard : React.FC<BadgeProps> = ({
             {/* Header */}
             <div className="text-center space-y-2">
               <div className="text-5xl text-gray-300 font-light tracking-wide">𝕏</div>
-              <div className="text-xl font-extrabold tracking-widest">{name}</div>
+              <div className="text-xl font-extrabold tracking-widest">{Xname}</div>
             </div>
 
             {/* Stats */}
@@ -88,11 +118,11 @@ const OldBadgeCard : React.FC<BadgeProps> = ({
               </div>
               <div className="text-center">
                 <div className="mb-1">WORTH</div>
-                <div className="text-white font-bold text-xs">{worth}</div>
+                <div className="text-white font-bold text-xs">{Worth}</div>
               </div>
               <div className="text-right">
                 <div className="mb-1">JOINED</div>
-                <div className="text-white font-bold text-xs">{joined.toUpperCase()}</div>
+                <div className="text-white font-bold text-xs">{created_At.toUpperCase()}</div>
               </div>
             </div>
 
@@ -102,11 +132,11 @@ const OldBadgeCard : React.FC<BadgeProps> = ({
             {/* Username and Name */}
             <div className="flex justify-between">
               <div>
-              <div className="text-gray-400 font-medium text-xs">@{username}</div>
-              <div className="text-white text-[1.2rem] font-bold mt-1">{Fullname}</div>
+              <div className="text-gray-400 font-medium text-xs">@{Xusername}</div>
+              <div className="text-white text-[1.2rem] font-bold mt-1">{FullName}</div>
               </div>
              <div>
-              <Badge status={userStatus.toLowerCase()} />
+              <Badge status={NgmiBadge.toLowerCase()} />
               </div>
             </div>
 
@@ -118,14 +148,14 @@ const OldBadgeCard : React.FC<BadgeProps> = ({
               
               {showQR && (
                 <div>
-                  <QrCodeIcon size={60} />
+                  <img src={qrUrl} alt="QR Code" />
                 </div>
               )}
 
               {/* Info */}
               <div className="text-right text-[10px] text-gray-400 space-y-3">
                 <div>
-                  <div className="text-xs text-gray-500 mb-1">ABOUT</div>
+                  <div className=" text-[10px] text-gray-400 mb-1">ABOUT</div>
                   <div className="font-bold">
                     {about.split('\n').map((line, index) => (
                       <span key={index}>
@@ -136,7 +166,7 @@ const OldBadgeCard : React.FC<BadgeProps> = ({
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500 mb-1">LOCATION</div>
+                  <div className=" text-[10px] text-gray-400 mb-1">LOCATION</div>
                   <div className="font-bold">
                     {location.split('\n').map((line, index) => (
                       <span key={index}>
@@ -152,6 +182,80 @@ const OldBadgeCard : React.FC<BadgeProps> = ({
         </div>
       </div>
     </div>
+      </div>
+
+
+      <div className="col-span-3">
+
+       <div className="min-h-screen  bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-6 m-6">
+        {/* Header Section */}
+        <div className="flex items-center gap-8 mb-10">
+          <div className="relative">
+            {profileUrl &&
+             <img
+              className="h-32 w-32 rounded-full object-cover ring-4 ring-white shadow-xl"
+              src={profileUrl}
+              alt="Profile"
+            />
+            }
+           
+            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white"></div>
+          </div>
+          <div className="flex-1">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-2">
+              {FullName}
+            </h1>
+          <p className="text-slate-600 text-lg font-medium">{jobLevel}</p>
+          </div>
+        </div>
+
+        {/* Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg">
+            <div className="flex items-center gap-3 mb-2">
+              <GitBranch className="size-[2rem]" />
+              <span className="text-sm font-medium opacity-90">Repositories</span>
+            </div>
+            <div className="text-3xl font-bold">{Trepos}</div>
+          </div>
+
+          <div className="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-2xl p-6 text-white shadow-lg">
+            <div className="flex items-center gap-3 mb-2">
+              <Star className="w-6 h-6" />
+              <span className="text-sm font-medium opacity-90">Total Stars</span>
+            </div>
+            <div className="text-3xl font-bold">{ghStars}</div>
+          </div>
+
+          <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg">
+            <div className="flex items-center gap-3 mb-2">
+              <Activity className="w-6 h-6" />
+              <span className="text-sm font-medium opacity-90">Commits</span>
+            </div>
+            <div className="text-3xl font-bold">{Tcommits}</div>
+          </div>
+        </div>
+
+        {/* Remarks Section */}
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+          <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <span></span> Remarks
+          </h3>
+          <p className="text-slate-700 leading-relaxed font-handwriting text-lg">
+            {remarks}
+          </p>
+        </div>
+      
+    </div>
+          
+
+      </div>
+
+
+
+    </div>
+
+   
   );
 };
 

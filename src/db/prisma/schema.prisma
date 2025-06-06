@@ -27,6 +27,9 @@ model user {
   profileUrl String?
   ghStars Int
   remarks String
+  Trepos Int
+  Tcommits Int
+  jobLevel String
   Xid String @unique 
   Xusername String 
   followers Int

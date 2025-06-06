@@ -1,15 +1,79 @@
 "use client"
 
-import React, { useState } from "react";
-import BadgeCard from "@/components/badge"; // make sure this path is correct
+import React, { useEffect, useState } from "react";
 import OldBadgeCard from "@/components/oldBadge";
+import { useSearchParams } from "next/navigation";
+import axios from "axios";
+import { toast } from "sonner";
 
 const BadgeCardPreview = () => {
   const [backgroundColor, setBackgroundColor] = useState("#0f172a");
   const [textColor, setTextColor] = useState("#ffffff");
   const [backgroundImage, setBackgroundImage] = useState("");
   const [overlayOpacity, setOverlayOpacity] = useState(0.7); // Overlay opacity for background image
+  const [response , setResponse] = useState<user>()
+  const params = useSearchParams();
+  const id = params.get("id")
 
+  interface user {
+  id?: string;
+  profileUrl?: string | null;
+  ghStars?: number;
+  remarks?: string;
+  Xid?: string;
+  Xusername: string;
+  followers: number;
+  Xname: string;
+  about: string;
+  location: string;
+  FullName: string;
+  QrUrl?: string;
+  NgmiBadge: string;
+  Worth: string;
+  created_At: string;
+  jobLevel : string;
+  Trepos : number;
+  Tcommits : number;
+  }
+
+  interface responseType {
+    msg : string
+    status : number
+    findUser : {
+  id?: string;
+  profileUrl?: string | null;
+  ghStars?: number;
+  remarks?: string;
+  Xid?: string;
+  Xusername: string;
+  followers: number;
+  Xname: string;
+  about: string;
+  location: string;
+  FullName: string;
+  QrUrl?: string;
+  NgmiBadge: string;
+  Worth: string;
+  created_At: string;
+  jobLevel : string;
+  Trepos : number;
+  Tcommits : number;
+    }
+  }
+
+
+  useEffect(()=> {
+    async function call() {
+        const response = await axios.get<responseType>(`/api/analyze?id=${id}`)
+        if(response && response.data.status == 200){
+            setResponse(response.data.findUser)
+        } else {
+            toast(response.data.msg)
+        }
+    }
+
+    call()
+  }, [])
   return (
     <div className="p-4 space-y-6 text-white bg-gray-900 min-h-screen">
       <h1 className="text-xl font-bold">Customize Your Badge</h1>
@@ -68,15 +132,26 @@ const BadgeCardPreview = () => {
 
       {/* Preview */}
       <div className="mt-6">
-        <OldBadgeCard
-          username="jerkeyray"
-          name="Aditya Srivastava"
-          followers={266}
-          joined="January 2025"
-          about="Consummate Tinkerer\nCSE-28"
-          location="Doofenshmirtz Evil Inc."
-          badgeLevel="Lowbie"
-          badgeLabel="X"
+        {
+            response &&
+
+                <OldBadgeCard
+          Xusername={response?.Xusername}
+          Xname={response.Xname}
+          followers={response.followers}
+          created_At={response.created_At}
+          about={response.about}
+          location={response.location}
+          badgeLevel=""
+          badgeLabel=""
+          NgmiBadge={response.NgmiBadge}
+          Worth={response.Worth}
+          FullName={response.FullName}
+          remarks={response.remarks}
+          Tcommits={response.Tcommits}
+          Trepos={response.Trepos}
+          ghStars={response.ghStars}
+          jobLevel={response.jobLevel}
           style={{
             backgroundColor,
             textColor,
@@ -84,6 +159,8 @@ const BadgeCardPreview = () => {
             overlayOpacity, // Control the dark overlay on the background image
           }}
         />
+        }
+    
       </div>
     </div>
   );
