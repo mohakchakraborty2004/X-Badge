@@ -55,7 +55,20 @@ const config: Config = {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
-  		}
+  		},
+	 animation: {
+        glow: 'glow 2s ease-in-out infinite',
+      },
+      keyframes: {
+        glow: {
+          '0%, 100%': {
+            boxShadow: '0 0 6px 2px rgba(139, 92, 246, 0.4)',
+          },
+          '50%': {
+            boxShadow: '0 0 12px 4px rgba(139, 92, 246, 0.6)',
+          },
+        },
+      },
   	}
   },
   plugins: [require("tailwindcss-animate")],

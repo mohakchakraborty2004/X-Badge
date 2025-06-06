@@ -76,3 +76,36 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes nebula-float {
+          0%, 100% { 
+            transform: translateY(0px) translateX(0px) scale(1); 
+          }
+          25% { 
+            transform: translateY(-30px) translateX(20px) scale(1.1); 
+          }
+          50% { 
+            transform: translateY(-10px) translateX(-15px) scale(0.9); 
+          }
+          75% { 
+            transform: translateY(-40px) translateX(10px) scale(1.05); 
+          }
+        }
+        
+        @keyframes grid-move {
+          0% { transform: translate(0, 0); }
+          100% { transform: translate(60px, 60px); }
+        }
+        
+        .animate-pulse {
+          animation: pulse 10s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+
+        .bg-gradient-radial {
+          background: radial-gradient(ellipse at center, var(--tw-gradient-stops));
+        }
