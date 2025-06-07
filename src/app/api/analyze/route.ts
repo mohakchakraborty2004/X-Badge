@@ -38,72 +38,85 @@ interface AnalyzeData {
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-async function analyze(Xdata : Xdata , ghData : ghData) {
-     const prompt = `
-   Analyze the following X/twitter data and Github Data which will be given in format of JSON. You are a genz and harsh truth spitter developer, who judges user's profile on the basis of : 
-   1. X followers and description 
-   2. X username 
-   3. Total commits in the processed repositories 
-   4. total stars earned in the processed repositories
-   5. Top Languages used 
-   6. Given other info (very very minimal effect on score but yet affects the score)
-   
-   After analyzing you give a user a badge out of { NPC, NGMI, MGMI, YGMI, WAGMI }.
-   You also give a profile evaluation worth in dollars, his estimated job level/position in market. 
-   And remarks on his profile which includes both crticism and suggestion.
+async function analyze(Xdata: Xdata, ghData: ghData) {
+  const prompt = `
+You are a brutally honest GenZ developer with sharp judgment. Your job is to rate a user's dev journey and online presence using their GitHub and X (Twitter) data.
 
-   Improvise a bias free and good scoring mechanism where Total stars, Commits, Top languages And followers count carry weight over other aspects but still those can affect it. 
+Rate them based on:
+- GitHub: total commits, total stars, top languages
+- X: followers count, description, username
+- Slightly consider other info too
 
-   Your output should be in json and in format like this example : 
-   {
-        "badge" : "WAGMI", 
-        "worth" : "40k $",
-        "jobLevel" : "Junior Developer",
-        "remarks" : "" (whatever the remarks you give)
-   }
+Rules:
+- Use this scoring guideline (customizable):
+  - Total Commits: 0-2000 (weight: 35%)
+  - Stars: 0-500+ (weight: 35%)
+  - Followers: 0-50k+ (weight: 20%)
+  - Description, username, and languages: (10%)
 
+Badges:
+- **NPC** – you're invisible.
+- **NGMI** – Not Gonna Make It.
+- **MGMI** – Might Gonna Make It.
+- **YGMI** – You Gonna Make It.
+- **WAGMI** – We All Gonna Make It.
 
-   X/ twitter data => ${Xdata} 
-   github data => ${ghData}
-    
-    Please analyze the Data carefully as and return only a JSON with the following structure and strictly nothing else:
-    {
-        "badge" : NPC/NGMI/MGMI/YGMI/WAGMI,
-        "worth" : "money in dollars",
-        "jobLevel" : "refer from the example",
-        "remarks" : "any remarks as instructed"
-    }
+Based on total score:
+- 0-30 => NPC
+- 31-50 => NGMI
+- 51-70 => MGMI
+- 71-85 => YGMI
+- 86+ => WAGMI
+
+Also estimate their **profile worth (in USD)** and **market job level** from:
+- Intern, Junior Dev, Mid-level Dev, Senior Dev, Tech Lead, Rockstar Dev
+
+Finally, generate **funny but honest remarks** that include praise, criticism, and practical suggestions.
+
+Return ONLY a JSON:
+{
+  "badge": "WAGMI",
+  "worth": "40k $",
+  "jobLevel": "Junior Developer",
+  "remarks": "Funny + useful critique here"
+}
+
+GitHub Data:
+${JSON.stringify(ghData)}
+
+X Data:
+${JSON.stringify(Xdata)}
   `;
 
   try {
-    const response = await genAI.models.generateContent({ 
-    model: "gemini-2.0-flash",
-    contents: prompt,
-    config: {
-      maxOutputTokens: 1000,
-      temperature: 0.7,
-    },
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: prompt,
+      config: {
+        maxOutputTokens: 1000,
+        temperature: 0.9, // increased for more personality
+      },
     });
-    
-   if(!response || !response.text) {
-        return {
-            msg : "error occured"
-        }
-   }
-   
-    const cleaned = JSON.parse(response.text.slice(
-    response.text.indexOf('{'), 
-    response.text.lastIndexOf('}') + 1
-    ));
 
-    console.log(cleaned)
-    return cleaned
-    
-} 
-catch(error) {
-  console.log(error)
+    if (!response || !response.text) {
+      return { msg: "error occurred" };
+    }
+
+    const cleaned = JSON.parse(
+      response.text.slice(
+        response.text.indexOf("{"),
+        response.text.lastIndexOf("}") + 1
+      )
+    );
+
+    console.log(cleaned);
+    return cleaned;
+  } catch (error) {
+    console.error("Error parsing AI response:", error);
+    return { msg: "AI evaluation failed" };
+  }
 }
-}
+
 
 export async function POST(req : NextRequest) {
 

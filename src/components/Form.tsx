@@ -132,7 +132,7 @@ export default function SimpleForm() {
   const handleSubmit = async () => {
 
     if(!verified || !Ghverified || !fullName || !url) {
-      toast("please verify and fillup the form")
+      alert("please verify and fillup the form")
       return;
     }
 
@@ -194,7 +194,7 @@ export default function SimpleForm() {
 
             {/* GitHub ID */}
             <div className="space-y-2">
-              <Label htmlFor="githubID" className="text-gray-300">GitHub Username</Label>
+              <Label htmlFor="githubID" className="text-gray-300">GitHub Username (It will take time)</Label>
               <Input
                 id="githubID"
                 placeholder="your-github-id"
@@ -254,10 +254,10 @@ export default function SimpleForm() {
             </div>
 
             {/* Submit */}
-            
+            <Label htmlFor="" className="text-gray-300">PS : The API for github stats is poorly excuted, So it will judge you on the basis of fetched content only.</Label>
           </form>
           <Button
-          disabled = {!verified && !Ghverified && !fullName && !url}
+          disabled = {!verified || !Ghverified || !fullName || !url}
           onClick={handleSubmit} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold mt-3">
               Submit
           </Button>
