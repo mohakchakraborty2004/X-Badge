@@ -18,6 +18,8 @@ export async function GET(req: NextRequest): Promise<Response> {
     "User-Agent": "GitHub-Stats-API",
   };
 
+  console.info("[github] Fetching profile statistics", { username });
+
   try {
     // 1. Verify user exists
     await axios.get(`https://api.github.com/users/${username}`, { headers });
@@ -40,6 +42,13 @@ export async function GET(req: NextRequest): Promise<Response> {
 
     const ownRepos = allRepos.filter(repo => !repo.fork);
     const forkedRepos = allRepos.filter(repo => repo.fork);
+
+    console.info("[github] Repositories fetched", {
+      username,
+      totalRepositories: allRepos.length,
+      ownRepositories: ownRepos.length,
+      forkedRepositories: forkedRepos.length,
+    });
 
     // 3. Stars
     const totalStars = ownRepos.reduce(
@@ -149,14 +158,18 @@ export async function GET(req: NextRequest): Promise<Response> {
       .slice(0, 10)
       .map(([lang]) => lang);
 
+    const stats = {
+      totalRepositories: ownRepos.length,
+      totalStars,
+      totalCommits,
+      topLanguages,
+      repositoriesProcessed: ownRepos.length,
+    };
+
+    console.info("[github] Profile statistics computed", { username, ...stats });
+
     return new Response(
-      JSON.stringify({
-        totalRepositories: ownRepos.length,
-        totalStars,
-        totalCommits,
-        topLanguages,
-        repositoriesProcessed: ownRepos.length,
-      }),
+      JSON.stringify(stats),
       {
         status: 200,
         headers: {
@@ -166,7 +179,11 @@ export async function GET(req: NextRequest): Promise<Response> {
       }
     );
   } catch (error: any) {
-    console.error("GitHub API error:", error?.response?.data || error.message);
+    console.error("[github] Failed to fetch profile statistics", {
+      username,
+      status: error?.response?.status,
+      error: error?.response?.data || error.message,
+    });
 
     if (error.response?.status === 403) {
       return new Response(
