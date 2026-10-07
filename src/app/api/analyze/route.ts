@@ -6,6 +6,7 @@ import { GoogleGenAI } from "@google/genai"
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/db/db";
 import dotenv from "dotenv"
+import { randomUUID } from "crypto";
 
 dotenv.config()
 
@@ -38,7 +39,27 @@ interface AnalyzeData {
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-async function analyze(Xdata: Xdata, ghData: ghData) {
+type LogLevel = "info" | "warn" | "error";
+
+function logAnalyzeEvent(
+  level: LogLevel,
+  event: string,
+  context: Record<string, string | number | boolean | undefined> = {}
+) {
+  // Keep logs deliberately limited to operational metadata. Request payloads and
+  // profile fields must never be added here.
+  console[level](JSON.stringify({
+    service: "analyze-api",
+    event,
+    ...context,
+  }));
+}
+
+function errorKind(error: unknown) {
+  return error instanceof Error ? error.name : "UnknownError";
+}
+
+async function analyze(Xdata: Xdata, ghData: ghData, requestId: string) {
   const prompt = `
 You are a brutally honest GenZ developer with sharp judgment. Your job is to rate a user's dev journey and online presence using their GitHub and X (Twitter) data.
 
@@ -89,6 +110,7 @@ ${JSON.stringify(Xdata)}
   `;
 
   try {
+    logAnalyzeEvent("info", "ai_analysis_started", { requestId });
     const response = await genAI.models.generateContent({
       model: "gemini-2.0-flash",
       contents: prompt,
@@ -99,6 +121,7 @@ ${JSON.stringify(Xdata)}
     });
 
     if (!response || !response.text) {
+      logAnalyzeEvent("warn", "ai_analysis_empty_response", { requestId });
       return { msg: "error occurred" };
     }
 
@@ -109,26 +132,46 @@ ${JSON.stringify(Xdata)}
       )
     );
 
-    console.log(cleaned);
+    logAnalyzeEvent("info", "ai_analysis_completed", { requestId });
     return cleaned;
   } catch (error) {
-    console.error("Error parsing AI response:", error);
+    logAnalyzeEvent("error", "ai_analysis_failed", {
+      requestId,
+      errorType: errorKind(error),
+    });
     return { msg: "AI evaluation failed" };
   }
 }
 
 
 export async function POST(req : NextRequest) {
+    const requestId = randomUUID();
+    const startedAt = Date.now();
+    logAnalyzeEvent("info", "post_request_started", { requestId });
 
-    const body = await req.json()
+    let body;
+    try {
+        body = await req.json()
+    } catch (error) {
+        logAnalyzeEvent("warn", "post_request_json_failed", {
+            requestId,
+            errorType: errorKind(error),
+        });
+        throw error;
+    }
     const {XData, ghData, fullName, url, xusername} : {XData : Xdata, ghData : ghData, fullName : string, url: string, xusername: string } = body
 
-    console.log(XData, ghData, fullName, url);
+    logAnalyzeEvent("info", "post_request_parsed", {
+        requestId,
+        hasXData: Boolean(XData),
+        hasGithubData: Boolean(ghData),
+    });
   
-    const response : AnalyzeData = await analyze(XData, ghData)
+    const response : AnalyzeData = await analyze(XData, ghData, requestId)
     const uriencodedURL = encodeURI(url)
 
     if(!response) {
+        logAnalyzeEvent("error", "post_analysis_missing", { requestId });
         return NextResponse.json({
             status : 500 ,
             msg : "Some Internal Server Error Occured"
@@ -144,6 +187,7 @@ export async function POST(req : NextRequest) {
         })
 
         if(res) {
+            logAnalyzeEvent("info", "post_persistence_started", { requestId, operation: "update" });
             const updateInfo = await prisma.user.update({
                 where : {
                     id : res.id
@@ -168,12 +212,18 @@ export async function POST(req : NextRequest) {
             })
 
             if(updateInfo) {
+                logAnalyzeEvent("info", "post_request_completed", {
+                    requestId,
+                    operation: "update",
+                    durationMs: Date.now() - startedAt,
+                });
                 return NextResponse.json({
                     status : 200 ,
                     msg : "Badge generated", 
                     id : updateInfo.id
                 })
             } else {
+                logAnalyzeEvent("error", "post_persistence_no_result", { requestId, operation: "update" });
                 return NextResponse.json({
                     status : 500 ,
                     msg : "please Try again later"
@@ -181,6 +231,7 @@ export async function POST(req : NextRequest) {
             }
         }
 
+        logAnalyzeEvent("info", "post_persistence_started", { requestId, operation: "create" });
         const NewUser = await prisma.user.create({
             data : {
                     ghStars : ghData.totalStars,
@@ -205,6 +256,11 @@ export async function POST(req : NextRequest) {
 
 
         if(NewUser){
+            logAnalyzeEvent("info", "post_request_completed", {
+                requestId,
+                operation: "create",
+                durationMs: Date.now() - startedAt,
+            });
             return NextResponse.json({  
                  status : 200,
                  msg : "Badge Generated", 
@@ -212,6 +268,7 @@ export async function POST(req : NextRequest) {
            })
         }
         else {
+            logAnalyzeEvent("error", "post_persistence_no_result", { requestId, operation: "create" });
             return NextResponse.json({
             status : 400,  
              msg : "Some Error occured"
@@ -220,7 +277,11 @@ export async function POST(req : NextRequest) {
 
 
     } catch (error) {
-        console.log(error);
+        logAnalyzeEvent("error", "post_request_failed", {
+            requestId,
+            errorType: errorKind(error),
+            durationMs: Date.now() - startedAt,
+        });
         return NextResponse.json({
             status : 500 ,
             msg : "Server is Busy or Down"
@@ -232,10 +293,14 @@ export async function POST(req : NextRequest) {
 }
 
 export async function GET(req : NextRequest) {
+  const requestId = randomUUID();
+  const startedAt = Date.now();
+  logAnalyzeEvent("info", "get_request_started", { requestId });
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
 
     if(!id) {
+        logAnalyzeEvent("warn", "get_request_invalid", { requestId, reason: "missing_id" });
         return NextResponse.json({
             status : 404,
             msg : "Invalid Id"
@@ -250,18 +315,32 @@ export async function GET(req : NextRequest) {
     })
 
     if (findUser) {
+        logAnalyzeEvent("info", "get_request_completed", {
+            requestId,
+            found: true,
+            durationMs: Date.now() - startedAt,
+        });
         return NextResponse.json({
             status : 200, 
             findUser
         })
     } else {
+        logAnalyzeEvent("warn", "get_request_completed", {
+            requestId,
+            found: false,
+            durationMs: Date.now() - startedAt,
+        });
         return NextResponse.json({
             status : 500, 
             msg : "internal Server Error"
         })
     }
   } catch (error) {
-    console.log(error)
+    logAnalyzeEvent("error", "get_request_failed", {
+        requestId,
+        errorType: errorKind(error),
+        durationMs: Date.now() - startedAt,
+    });
     return NextResponse.json({
             status : 500, 
             msg : "Server is down"
