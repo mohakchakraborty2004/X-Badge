@@ -9,6 +9,9 @@ import dotenv from "dotenv"
 
 dotenv.config()
 
+// Prisma and the AI SDK require the Node.js runtime when deployed to Vercel.
+export const runtime = "nodejs";
+
 interface Xdata {
     id : string,
     name : string,
