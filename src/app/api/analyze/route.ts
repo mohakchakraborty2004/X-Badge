@@ -6,7 +6,6 @@ import { GoogleGenAI } from "@google/genai"
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/db/db";
 import dotenv from "dotenv"
-import { randomUUID } from "crypto";
 
 dotenv.config()
 
@@ -145,7 +144,7 @@ ${JSON.stringify(Xdata)}
 
 
 export async function POST(req : NextRequest) {
-    const requestId = randomUUID();
+    const requestId = crypto.randomUUID();
     const startedAt = Date.now();
     logAnalyzeEvent("info", "post_request_started", { requestId });
 
@@ -293,7 +292,7 @@ export async function POST(req : NextRequest) {
 }
 
 export async function GET(req : NextRequest) {
-  const requestId = randomUUID();
+  const requestId = crypto.randomUUID();
   const startedAt = Date.now();
   logAnalyzeEvent("info", "get_request_started", { requestId });
   const { searchParams } = new URL(req.url);
